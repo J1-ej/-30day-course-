@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python за 30 дней · Backend & Security</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Unbounded:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e12;
+  --surface: #16161d;
+  --surface2: #1e1e28;
+  --surface3: #252534;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0eeff;
+  --muted: #8b8ba0;
+  --dim: #525265;
+  --green: #3dffa0;
+  --green-dim: rgba(61,255,160,0.12);
+  --green-border: rgba(61,255,160,0.3);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167,139,250,0.12);
+  --purple-border: rgba(167,139,250,0.3);
+  --blue: #60c0ff;
+  --blue-dim: rgba(96,192,255,0.12);
+  --blue-border: rgba(96,192,255,0.3);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,0.12);
+  --amber-border: rgba(251,191,36,0.3);
+  --red: #f87171;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --font: 'Manrope', sans-serif;
+  --font-display: 'Unbounded', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.7;min-height:100vh;overflow-x:hidden}
+
+/* NOISE TEXTURE */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4}
+
+/* GRID LINES */
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+.container{max-width:780px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+
+/* ── HEADER ── */
+.header{padding:60px 0 40px;text-align:center}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:40px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--green);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:28px}
+.header-badge span{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.5)}}
+.header h1{font-family:var(--font-display);font-size:clamp(28px,6vw,52px);font-weight:700;line-height:1.1;margin-bottom:16px;letter-spacing:-1px}
+.header h1 .accent{color:var(--green)}
+.header p{color:var(--muted);font-size:16px;max-width:480px;margin:0 auto 28px}
+.header-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.htag{padding:5px 14px;border-radius:40px;font-size:12px;font-weight:600;border:1px solid}
+.htag-g{color:var(--green);background:var(--green-dim);border-color:var(--green-border)}
+.htag-p{color:var(--purple);background:var(--purple-dim);border-color:var(--purple-border)}
+.htag-b{color:var(--blue);background:var(--blue-dim);border-color:var(--blue-border)}
+
+/* ── PROGRESS ── */
+.progress-section{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px 24px;margin-bottom:32px}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.progress-top span{font-size:13px;color:var(--muted)}
+.progress-top strong{font-size:18px;font-weight:700;color:var(--green);font-family:var(--font-display)}
+.bar-track{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--green),#00d4ff);border-radius:3px;transition:width 0.5s cubic-bezier(.4,0,.2,1)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.stat{background:var(--surface2);border-radius:var(--radius-sm);padding:12px;text-align:center}
+.stat-val{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text)}
+.stat-label{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── WEEK NAV ── */
+.week-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:28px}
+.wnav{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 8px;cursor:pointer;text-align:center;transition:all 0.2s}
+.wnav:hover{border-color:var(--border2);background:var(--surface2)}
+.wnav.active-w1{background:var(--green-dim);border-color:var(--green-border)}
+.wnav.active-w2{background:var(--purple-dim);border-color:var(--purple-border)}
+.wnav.active-w3{background:var(--amber-dim);border-color:var(--amber-border)}
+.wnav.active-w4{background:var(--blue-dim);border-color:var(--blue-border)}
+.wnav .wn{font-family:var(--font-display);font-size:20px;font-weight:700;display:block;margin-bottom:2px}
+.wnav.active-w1 .wn{color:var(--green)}
+.wnav.active-w2 .wn{color:var(--purple)}
+.wnav.active-w3 .wn{color:var(--amber)}
+.wnav.active-w4 .wn{color:var(--blue)}
+.wnav .wt{font-size:11px;color:var(--muted)}
+
+/* ── WEEK SECTION ── */
+.week-section{display:none}
+.week-section.show{display:block}
+.week-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.week-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.w1 .week-icon{background:var(--green-dim)}
+.w2 .week-icon{background:var(--purple-dim)}
+.w3 .week-icon{background:var(--amber-dim)}
+.w4 .week-icon{background:var(--blue-dim)}
+.week-meta h2{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text)}
+.week-meta p{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── DAY CARD ── */
+.day-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;transition:border-color 0.2s}
+.day-card:hover{border-color:var(--border2)}
+.day-card.done{border-color:rgba(61,255,160,0.4)}
+.day-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.day-num{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:12px;font-weight:700;flex-shrink:0}
+.w1 .day-num{background:var(--green-dim);color:var(--green)}
+.w2 .day-num{background:var(--purple-dim);color:var(--purple)}
+.w3 .day-num{background:var(--amber-dim);color:var(--amber)}
+.w4 .day-num{background:var(--blue-dim);color:var(--blue)}
+.day-title{font-size:14px;font-weight:600;flex:1;color:var(--text)}
+.day-check{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all 0.2s}
+.day-card.done .day-check{background:var(--green);border-color:var(--green);color:#0a1a10}
+.day-arrow{font-size:12px;color:var(--dim);transition:transform 0.2s;flex-shrink:0}
+.day-card.open .day-arrow{transform:rotate(90deg)}
+.day-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
+.day-card.open .day-body{display:block}
+.section-row{margin-top:14px}
+.section-row label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:6px}
+.section-row p{font-size:13px;color:var(--muted);line-height:1.65}
+.code-block{background:#0a0a10;border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-top:8px;font-family:var(--font-mono);font-size:12px;line-height:1.75;overflow-x:auto;position:relative}
+.code-block .cm{color:var(--dim)}
+.code-block .kw{color:#ff7eb6;font-weight:600}
+.code-block .fn{color:#7dd3fc}
+.code-block .str{color:#86efac}
+.code-block .num{color:#fbbf24}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pill{font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.tip{background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:var(--radius-sm);padding:10px 14px;margin-top:10px}
+.tip .tip-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+.tip p{font-size:12px;color:rgba(251,191,36,0.8);line-height:1.6}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.lnk{font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);color:var(--muted);text-decoration:none;background:var(--surface2);transition:all 0.15s}
+.lnk:hover{color:var(--text);border-color:var(--border2)}
+.task-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid;border-radius:var(--radius-sm);padding:12px 14px;margin-top:10px}
+.w1 .task-box{border-left-color:var(--green)}
+.w2 .task-box{border-left-color:var(--purple)}
+.w3 .task-box{border-left-color:var(--amber)}
+.w4 .task-box{border-left-color:var(--blue)}
+.task-box .task-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.w1 .task-box .task-label{color:var(--green)}
+.w2 .task-box .task-label{color:var(--purple)}
+.w3 .task-box .task-label{color:var(--amber)}
+.w4 .task-box .task-label{color:var(--blue)}
+.task-box p{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ── MINI PROJECT ── */
+.mini-project{border-radius:var(--radius);padding:22px 24px;margin:20px 0;border:1px solid}
+.w1 .mini-project{background:var(--green-dim);border-color:var(--green-border)}
+.w2 .mini-project{background:var(--purple-dim);border-color:var(--purple-border)}
+.w3 .mini-project{background:var(--amber-dim);border-color:var(--amber-border)}
+.w4 .mini-project{background:var(--blue-dim);border-color:var(--blue-border)}
+.mp-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.w1 .mp-label{color:var(--green)}
+.w2 .mp-label{color:var(--purple)}
+.w3 .mp-label{color:var(--amber)}
+.w4 .mp-label{color:var(--blue)}
+.mini-project h3{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px}
+.mini-project p{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:10px}
+.checklist{list-style:none}
+.checklist li{font-size:13px;color:var(--muted);padding:4px 0;display:flex;gap:8px;align-items:flex-start}
+.w1 .checklist li::before{content:"▶";color:var(--green);font-size:9px;margin-top:5px;flex-shrink:0}
+.w2 .checklist li::before{content:"▶";color:var(--purple);font-size:9px;margin-top:5px;flex-shrink:0}
+.w3 .checklist li::before{content:"▶";color:var(--amber);font-size:9px;margin-top:5px;flex-shrink:0}
+.w4 .checklist li::before{content:"▶";color:var(--blue);font-size:9px;margin-top:5px;flex-shrink:0}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding:48px 0 32px;color:var(--dim);font-size:13px;border-top:1px solid var(--border);margin-top:40px}
+.footer span{color:var(--green)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge"><span></span>Курс активен</div>
+    <h1>Python за <span class="accent">30 дней</span></h1>
+    <p>Backend разработка и кибербезопасность. Теория + практика каждый день по методу 50/50.</p>
+    <div class="header-tags">
+      <span class="htag htag-g">Backend</span>
+      <span class="htag htag-p">Cybersecurity</span>
+      <span class="htag htag-b">30 задач</span>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-section">
+    <div class="progress-top">
+      <span>Общий прогресс</span>
+      <strong id="prog-val">0%</strong>
+    </div>
+    <div class="bar-track"><div class="bar-fill" id="bar" style="width:0%"></div></div>
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-val" id="done-count">0</div><div class="stat-label">выполнено дней</div></div>
+      <div class="stat"><div class="stat-val">4</div><div class="stat-label">мини-проекта</div></div>
+      <div class="stat"><div class="stat-val">30</div><div class="stat-label">всего задач</div></div>
+    </div>
+  </div>
+
+  <!-- WEEK NAV -->
+  <div class="week-nav">
+    <div class="wnav active-w1" onclick="showWeek(1)"><span class="wn">W1</span><span class="wt">Синтаксис</span></div>
+    <div class="wnav" onclick="showWeek(2)"><span class="wn">W2</span><span class="wt">Структуры</span></div>
+    <div class="wnav" onclick="showWeek(3)"><span class="wn">W3</span><span class="wt">ООП</span></div>
+    <div class="wnav" onclick="showWeek(4)"><span class="wn">W4</span><span class="wt">Сеть</span></div>
+  </div>
+
+  <!-- ═══════════════════ WEEK 1 ═══════════════════ -->
+  <div id="week1" class="week-section w1 show">
+    <div class="week-header">
+      <div class="week-icon">🌱</div>
+      <div class="week-meta">
+        <h2>Неделя 1 — Базовый синтаксис</h2>
+        <p>Дни 1–7 · Правила грамматики языка · Мини-проект: ToDo-менеджер</p>
+      </div>
+    </div>
+
+    <!-- DAY 1 -->
+    <div class="day-card" id="d1">
+      <div class="day-head" onclick="toggleCard('d1')">
+        <div class="day-num">01</div>
+        <div class="day-title">Переменные и типы данных</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d1')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Установка Python 3.12 + VS Code. Переменные — это «коробки» для хранения данных. Типы: <code>int</code> (целые), <code>float</code> (дробные), <code>str</code> (текст), <code>bool</code> (True/False). Вывод через <code>print()</code>.</p></div>
+        <div class="pills"><span class="pill">int</span><span class="pill">float</span><span class="pill">str</span><span class="pill">bool</span><span class="pill">print()</span><span class="pill">input()</span></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="cm"># Тип данных определяется автоматически</span>
+name = <span class="str">"Алишер"</span>          <span class="cm"># str</span>
+age = <span class="num">21</span>                  <span class="cm"># int</span>
+gpa = <span class="num">4.7</span>                  <span class="cm"># float</span>
+is_student = <span class="kw">True</span>          <span class="cm"># bool</span>
+
+<span class="fn">print</span>(<span class="str">f"Привет, {name}!"</span>)   <span class="cm"># f-строки — мощный способ вставить переменную</span>
+<span class="fn">print</span>(<span class="str">f"Тип name: {type(name)}"</span>)</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Программа «Анкета»: запроси имя, возраст и город через <code>input()</code>. Выведи: «Пользователь [Имя] из [Город], возраст [Возраст] — зарегистрирован».</p></div>
+        <div class="links">
+          <a class="lnk" href="https://code.visualstudio.com/download" target="_blank">⬇ Скачать VS Code</a>
+          <a class="lnk" href="https://www.python.org/downloads/" target="_blank">⬇ Скачать Python</a>
+          <a class="lnk" href="https://docs.python.org/3/tutorial/introduction.html" target="_blank">📖 Docs</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 2 -->
+    <div class="day-card" id="d2">
+      <div class="day-head" onclick="toggleCard('d2')">
+        <div class="day-num">02</div>
+        <div class="day-title">Математика и преобразование типов</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d2')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Арифметические операторы. <code>input()</code> всегда возвращает строку, поэтому числа нужно конвертировать через <code>int()</code> или <code>float()</code>.</p></div>
+        <div class="pills"><span class="pill">+</span><span class="pill">-</span><span class="pill">*</span><span class="pill">/</span><span class="pill">//</span><span class="pill">%</span><span class="pill">**</span><span class="pill">int()</span><span class="pill">float()</span></div>
+        <div class="section-row"><label>Пример + частая ошибка</label>
+          <div class="code-block"><span class="cm"># ОШИБКА: нельзя прибавить строку к числу</span>
+x = <span class="fn">input</span>(<span class="str">"Число: "</span>)   <span class="cm"># x = "5" (строка!)</span>
+<span class="cm"># print(x + 1)  → TypeError</span>
+
+<span class="cm"># ПРАВИЛЬНО: конвертируй сразу</span>
+x = <span class="fn">int</span>(<span class="fn">input</span>(<span class="str">"Число: "</span>))   <span class="cm"># x = 5 (целое)</span>
+
+bill = <span class="fn">float</span>(<span class="fn">input</span>(<span class="str">"Сумма счёта: "</span>))
+tip_pct = <span class="fn">float</span>(<span class="fn">input</span>(<span class="str">"Чаевые %: "</span>))
+total = bill + (bill * tip_pct / <span class="num">100</span>)
+<span class="fn">print</span>(<span class="str">f"Итого: {total:.2f}"</span>)   <span class="cm"># :.2f — два знака после точки</span></div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Калькулятор чаевых: пользователь вводит сумму счёта и процент — программа выводит итоговую сумму и отдельно размер чаевых.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 3 -->
+    <div class="day-card" id="d3">
+      <div class="day-head" onclick="toggleCard('d3')">
+        <div class="day-num">03</div>
+        <div class="day-title">Условия if / elif / else</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d3')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Ветвления — программа принимает решения. Логические операторы: <code>and</code> (оба условия), <code>or</code> (хотя бы одно), <code>not</code> (отрицание). Сравнение: <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block">age = <span class="fn">int</span>(<span class="fn">input</span>(<span class="str">"Возраст: "</span>))
+invite = <span class="fn">input</span>(<span class="str">"Есть приглашение? (да/нет): "</span>).lower()
+
+<span class="kw">if</span> age >= <span class="num">18</span> <span class="kw">and</span> invite == <span class="str">"да"</span>:
+    <span class="fn">print</span>(<span class="str">"✅ Доступ разрешён"</span>)
+<span class="kw">elif</span> age >= <span class="num">18</span> <span class="kw">and</span> invite != <span class="str">"да"</span>:
+    <span class="fn">print</span>(<span class="str">"🔒 Нужно приглашение"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"❌ Отказано: возраст меньше 18"</span>)</div>
+        </div>
+        <div class="tip"><div class="tip-label">⚠ Частая ошибка</div><p><code>=</code> — это присвоение. <code>==</code> — это сравнение. Написать <code>if x = 5</code> — ошибка синтаксиса.</p></div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Система «Проверка доступа»: возраст + наличие приглашения → три разных ответа программы.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 4 -->
+    <div class="day-card" id="d4">
+      <div class="day-head" onclick="toggleCard('d4')">
+        <div class="day-num">04</div>
+        <div class="day-title">Списки (Lists)</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d4')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Список — упорядоченная коллекция данных. Индексы начинаются с <code>0</code>. Отрицательный индекс <code>[-1]</code> — последний элемент.</p></div>
+        <div class="pills"><span class="pill">.append()</span><span class="pill">.remove()</span><span class="pill">.pop()</span><span class="pill">.sort()</span><span class="pill">len()</span><span class="pill">in</span></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block">cart = [<span class="str">"яблоки"</span>, <span class="str">"молоко"</span>, <span class="str">"хлеб"</span>]
+
+cart.append(<span class="str">"сыр"</span>)       <span class="cm"># добавить в конец</span>
+cart.remove(<span class="str">"молоко"</span>)    <span class="cm"># удалить по значению</span>
+last = cart.pop()         <span class="cm"># удалить и вернуть последний</span>
+
+<span class="fn">print</span>(cart[<span class="num">0</span>])            <span class="cm"># → яблоки</span>
+<span class="fn">print</span>(cart[-<span class="num">1</span>])           <span class="cm"># → последний элемент</span>
+<span class="fn">print</span>(<span class="str">"сыр"</span> <span class="kw">in</span> cart)      <span class="cm"># → True или False</span>
+<span class="fn">print</span>(<span class="fn">len</span>(cart))           <span class="cm"># → количество элементов</span></div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Список покупок: меню с вариантами «добавить», «удалить», «показать список», «выйти». Программа работает в цикле до выхода.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 5 -->
+    <div class="day-card" id="d5">
+      <div class="day-head" onclick="toggleCard('d5')">
+        <div class="day-num">05</div>
+        <div class="day-title">Цикл for и range()</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d5')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p><code>for</code> перебирает каждый элемент коллекции или диапазон чисел. <code>range(start, stop, step)</code> — генератор чисел. <code>enumerate()</code> — даёт индекс + значение.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block">n = <span class="fn">int</span>(<span class="fn">input</span>(<span class="str">"Таблица умножения для: "</span>))
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">11</span>):
+    <span class="fn">print</span>(<span class="str">f"{n} × {i} = {n*i}"</span>)
+
+<span class="cm"># Перебор списка с индексом</span>
+fruits = [<span class="str">"яблоко"</span>, <span class="str">"груша"</span>, <span class="str">"персик"</span>]
+<span class="kw">for</span> idx, fruit <span class="kw">in</span> <span class="fn">enumerate</span>(fruits, <span class="num">1</span>):
+    <span class="fn">print</span>(<span class="str">f"{idx}. {fruit}"</span>)</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Программа выводит полную таблицу умножения для введённого числа от 1 до 10. Бонус: выведи таблицы для всех чисел от 2 до 9.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 6 -->
+    <div class="day-card" id="d6">
+      <div class="day-head" onclick="toggleCard('d6')">
+        <div class="day-num">06</div>
+        <div class="day-title">Цикл while, break, continue</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d6')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p><code>while</code> работает, пока условие истинно. <code>while True</code> — бесконечный цикл (основа серверов). <code>break</code> — немедленный выход. <code>continue</code> — пропустить текущую итерацию.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">import</span> random
+secret = random.randint(<span class="num">1</span>, <span class="num">100</span>)
+attempts = <span class="num">0</span>
+
+<span class="kw">while True</span>:
+    guess = <span class="fn">int</span>(<span class="fn">input</span>(<span class="str">"Угадай число (1-100): "</span>))
+    attempts += <span class="num">1</span>
+    <span class="kw">if</span> guess == secret:
+        <span class="fn">print</span>(<span class="str">f"🎉 Угадал за {attempts} попыток!"</span>)
+        <span class="kw">break</span>
+    <span class="kw">elif</span> guess < secret:
+        <span class="fn">print</span>(<span class="str">"📈 Больше"</span>)
+    <span class="kw">else</span>:
+        <span class="fn">print</span>(<span class="str">"📉 Меньше"</span>)</div>
+        </div>
+        <div class="tip"><div class="tip-label">🔗 Связь с backend</div><p>Серверы работают именно в <code>while True</code> цикле — они бесконечно ждут входящих запросов и обрабатывают их.</p></div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Игра «Угадай число» от 1 до 100. Добавь счётчик попыток и сообщение «Рекорд» если угадал менее чем за 7 попыток.</p></div>
+      </div>
+    </div>
+
+    <!-- MINI PROJECT W1 -->
+    <div class="mini-project">
+      <div class="mp-label">🏆 Мини-проект · День 7</div>
+      <h3>Консольный ToDo-менеджер</h3>
+      <p>Объедини всё из недели 1 в одной программе. Это твоя первая полноценная утилита.</p>
+      <ul class="checklist">
+        <li>Меню: 1 — Добавить задачу, 2 — Показать список, 3 — Удалить, 4 — Выйти</li>
+        <li>Хранить задачи в списке, нумеровать при выводе через <code>enumerate()</code></li>
+        <li>Работает в бесконечном <code>while True</code> цикле до выбора «4»</li>
+        <li>Обработка: если список пустой при попытке удалить — вывести сообщение</li>
+        <li>Бонус: добавь статусы «✅ готово / ⏳ в процессе» через словарь</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ WEEK 2 ═══════════════════ -->
+  <div id="week2" class="week-section w2">
+    <div class="week-header">
+      <div class="week-icon">🧱</div>
+      <div class="week-meta">
+        <h2>Неделя 2 — Структуры данных и функции</h2>
+        <p>Дни 8–14 · Структурированный код · Мини-проект: Шифратор Цезаря</p>
+      </div>
+    </div>
+
+    <!-- DAY 8 -->
+    <div class="day-card" id="d8">
+      <div class="day-head" onclick="toggleCard('d8')">
+        <div class="day-num">08</div>
+        <div class="day-title">Словари — Dict</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d8')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Словари хранят данные в формате <code>ключ: значение</code>. Ключи уникальны. Это прямой аналог JSON — основного формата данных в Backend и API.</p></div>
+        <div class="pills"><span class="pill">.get()</span><span class="pill">.keys()</span><span class="pill">.values()</span><span class="pill">.items()</span><span class="pill">.update()</span><span class="pill">del</span></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block">user = {
+    <span class="str">"name"</span>: <span class="str">"Алишер"</span>,
+    <span class="str">"age"</span>: <span class="num">21</span>,
+    <span class="str">"role"</span>: <span class="str">"admin"</span>
+}
+
+<span class="fn">print</span>(user[<span class="str">"name"</span>])              <span class="cm"># → Алишер</span>
+<span class="fn">print</span>(user.get(<span class="str">"email"</span>, <span class="str">"N/A"</span>))  <span class="cm"># → N/A (безопасно)</span>
+
+<span class="kw">for</span> key, val <span class="kw">in</span> user.items():
+    <span class="fn">print</span>(<span class="str">f"{key}: {val}"</span>)
+
+<span class="cm"># JSON в Python — это dict!</span>
+<span class="kw">import</span> json
+json_str = json.dumps(user)     <span class="cm"># dict → строка JSON</span>
+back = json.loads(json_str)     <span class="cm"># строка JSON → dict</span></div>
+        </div>
+        <div class="tip"><div class="tip-label">🔗 Backend связь</div><p>Каждый ответ от REST API — это JSON, который Python автоматически превращает в dict. Зная словари, ты умеешь работать с любым API.</p></div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Телефонная книга: добавление контактов, поиск по имени, удаление. Данные хранятся в словаре <code>{"имя": "номер"}</code>.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 9 -->
+    <div class="day-card" id="d9">
+      <div class="day-head" onclick="toggleCard('d9')">
+        <div class="day-num">09</div>
+        <div class="day-title">Функции def и return</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d9')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Функция — именованный блок кода, который можно вызвать много раз. Принцип DRY: Don't Repeat Yourself. Аргументы по умолчанию. Несколько возвращаемых значений.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">calculate_bmi</span>(weight: <span class="fn">float</span>, height: <span class="fn">float</span>) -> <span class="fn">tuple</span>:
+    <span class="str">"""Считает ИМТ и возвращает значение + категорию"""</span>
+    bmi = weight / (height ** <span class="num">2</span>)
+    <span class="kw">if</span> bmi < <span class="num">18.5</span>:
+        category = <span class="str">"Недовес"</span>
+    <span class="kw">elif</span> bmi < <span class="num">25</span>:
+        category = <span class="str">"Норма"</span>
+    <span class="kw">else</span>:
+        category = <span class="str">"Избыток"</span>
+    <span class="kw">return</span> <span class="fn">round</span>(bmi, <span class="num">2</span>), category
+
+result, cat = <span class="fn">calculate_bmi</span>(<span class="num">70</span>, <span class="num">1.75</span>)
+<span class="fn">print</span>(<span class="str">f"ИМТ: {result} — {cat}"</span>)</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Калькулятор: функции <code>add(a,b)</code>, <code>subtract(a,b)</code>, <code>multiply(a,b)</code>, <code>divide(a,b)</code>. Меню выбора операции. Функция <code>divide</code> должна обрабатывать деление на ноль.</p></div>
+        <div class="links">
+          <a class="lnk" href="https://docs.python.org/3/tutorial/controlflow.html#defining-functions" target="_blank">📖 Docs: функции</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 10 -->
+    <div class="day-card" id="d10">
+      <div class="day-head" onclick="toggleCard('d10')">
+        <div class="day-num">10</div>
+        <div class="day-title">Области видимости переменных</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d10')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Переменная, созданная внутри функции, не видна снаружи (локальная). <code>global</code> позволяет изменять глобальную переменную изнутри функции. Лучшая практика — передавать данные через аргументы и <code>return</code>.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block">balance = <span class="num">1000</span>  <span class="cm"># глобальная переменная</span>
+
+<span class="kw">def</span> <span class="fn">deposit</span>(amount):
+    <span class="kw">global</span> balance
+    <span class="kw">if</span> amount <= <span class="num">0</span>:
+        <span class="fn">print</span>(<span class="str">"Сумма должна быть положительной"</span>)
+        <span class="kw">return</span>
+    balance += amount
+    <span class="fn">print</span>(<span class="str">f"✅ Пополнено на {amount}. Баланс: {balance}"</span>)
+
+<span class="kw">def</span> <span class="fn">withdraw</span>(amount):
+    <span class="kw">global</span> balance
+    <span class="kw">if</span> amount > balance:
+        <span class="fn">print</span>(<span class="str">"❌ Недостаточно средств"</span>)
+    <span class="kw">else</span>:
+        balance -= amount
+        <span class="fn">print</span>(<span class="str">f"💸 Снято {amount}. Баланс: {balance}"</span>)</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Программа «Банк»: функции deposit(), withdraw(), show_balance(). Работает в меню-цикле. История операций хранится в списке.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 11 -->
+    <div class="day-card" id="d11">
+      <div class="day-head" onclick="toggleCard('d11')">
+        <div class="day-num">11</div>
+        <div class="day-title">Строки — методы и срезы</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d11')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Строка — неизменяемая последовательность символов. Срезы работают как в списках. Методы строк — основа обработки логов и текстовых данных.</p></div>
+        <div class="pills"><span class="pill">.split()</span><span class="pill">.join()</span><span class="pill">.strip()</span><span class="pill">.lower()</span><span class="pill">.upper()</span><span class="pill">.replace()</span><span class="pill">.startswith()</span><span class="pill">.find()</span></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block">log = <span class="str">"2024-01-15 ERROR user@mail.com failed login"</span>
+
+<span class="cm"># Срез: достать дату</span>
+date = log[:<span class="num">10</span>]              <span class="cm"># → 2024-01-15</span>
+<span class="cm"># Разбить на части</span>
+parts = log.split()            <span class="cm"># → список слов</span>
+level = parts[<span class="num">1</span>]              <span class="cm"># → ERROR</span>
+
+<span class="cm"># Проверка на тревогу</span>
+<span class="kw">if</span> <span class="str">"ERROR"</span> <span class="kw">in</span> log <span class="kw">or</span> <span class="str">"FAIL"</span> <span class="kw">in</span> log.upper():
+    <span class="fn">print</span>(<span class="str">f"⚠ Тревога: {date}"</span>)</div>
+        </div>
+        <div class="tip"><div class="tip-label">🔒 Связь с ИБ</div><p>Парсинг строк — основа анализа логов. SIEM-системы (Splunk, ELK) именно так находят аномалии и атаки в миллионах строк логов.</p></div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Анализатор текста: считает количество слов, находит «запрещённые» слова из списка, выводит статистику.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 12 -->
+    <div class="day-card" id="d12">
+      <div class="day-head" onclick="toggleCard('d12')">
+        <div class="day-num">12</div>
+        <div class="day-title">Работа с файлами</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d12')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Открытие файлов через <code>open()</code>. Режимы: <code>"r"</code> — читать, <code>"w"</code> — писать (затирает), <code>"a"</code> — дописывать. Контекстный менеджер <code>with</code> закрывает файл автоматически даже при ошибке.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="cm"># Запись в файл (дневник)</span>
+entry = <span class="fn">input</span>(<span class="str">"Запись: "</span>)
+timestamp = datetime.now().strftime(<span class="str">"%Y-%m-%d %H:%M"</span>)
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"diary.txt"</span>, <span class="str">"a"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.write(<span class="str">f"[{timestamp}] {entry}\n"</span>)
+
+<span class="cm"># Чтение всех записей</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"diary.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:
+        <span class="fn">print</span>(line.strip())</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Программа-дневник: записывает введённый текст в файл с датой и временем. Меню: написать запись / прочитать все записи.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 13 -->
+    <div class="day-card" id="d13">
+      <div class="day-head" onclick="toggleCard('d13')">
+        <div class="day-num">13</div>
+        <div class="day-title">Обработка исключений try/except</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d13')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Исключения — это ошибки во время выполнения. <code>try/except</code> перехватывает их. <code>except ValueError</code> — конкретный тип ошибки. <code>finally</code> — выполняется всегда.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">safe_divide</span>(a, b):
+    <span class="kw">try</span>:
+        result = a / b
+        <span class="kw">return</span> result
+    <span class="kw">except</span> ZeroDivisionError:
+        <span class="fn">print</span>(<span class="str">"❌ Деление на ноль!"</span>)
+        <span class="kw">return</span> <span class="kw">None</span>
+    <span class="kw">except</span> TypeError:
+        <span class="fn">print</span>(<span class="str">"❌ Нужны числа, не текст"</span>)
+        <span class="kw">return</span> <span class="kw">None</span>
+
+<span class="cm"># Безопасный ввод числа</span>
+<span class="kw">while True</span>:
+    <span class="kw">try</span>:
+        n = <span class="fn">int</span>(<span class="fn">input</span>(<span class="str">"Введи число: "</span>))
+        <span class="kw">break</span>
+    <span class="kw">except</span> ValueError:
+        <span class="fn">print</span>(<span class="str">"Это не число, попробуй снова"</span>)</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Улучши калькулятор из дня 9: добавь обработку всех ошибок. Программа не должна «падать» ни при каком вводе пользователя.</p></div>
+      </div>
+    </div>
+
+    <!-- MINI PROJECT W2 -->
+    <div class="mini-project">
+      <div class="mp-label">🏆 Мини-проект · День 14</div>
+      <h3>Шифратор текста — Шифр Цезаря</h3>
+      <p>Твой первый инструмент из мира криптографии. Читает файл, шифрует и записывает результат.</p>
+      <ul class="checklist">
+        <li>Функция <code>encrypt(text, shift)</code> — сдвигает каждую букву на N позиций в алфавите</li>
+        <li>Функция <code>decrypt(text, shift)</code> — обратная операция</li>
+        <li>Читает текст из <code>input.txt</code>, записывает в <code>output.txt</code></li>
+        <li>Работает с кириллицей и латиницей, не трогает цифры и пробелы</li>
+        <li>Бонус: функция <code>crack(text)</code> — перебирает все 26 сдвигов и выводит их</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ WEEK 3 ═══════════════════ -->
+  <div id="week3" class="week-section w3">
+    <div class="week-header">
+      <div class="week-icon">🏗</div>
+      <div class="week-meta">
+        <h2>Неделя 3 — Объектно-ориентированное программирование</h2>
+        <p>Дни 15–21 · Классы и объекты · Мини-проект: Система логина</p>
+      </div>
+    </div>
+
+    <!-- DAY 15 -->
+    <div class="day-card" id="d15">
+      <div class="day-head" onclick="toggleCard('d15')">
+        <div class="day-num">15</div>
+        <div class="day-title">Класс и объект — основы</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d15')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Класс — это шаблон (как чертёж). Объект — конкретный экземпляр (как готовая машина по чертежу). ООП позволяет моделировать реальный мир в коде.</p></div>
+        <div class="section-row"><label>Аналогия</label><p>Класс <code>Car</code> — это чертёж машины. Объект <code>my_car = Car()</code> — это конкретная машина, сделанная по чертежу. Можно создать 1000 машин по одному чертежу.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">class</span> <span class="fn">Car</span>:
+    <span class="cm"># Атрибуты класса (общие для всех машин)</span>
+    wheels = <span class="num">4</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, brand, model, year):
+        <span class="cm"># Атрибуты объекта (свои у каждой машины)</span>
+        self.brand = brand
+        self.model = model
+        self.year = year
+
+my_car = <span class="fn">Car</span>(<span class="str">"Toyota"</span>, <span class="str">"Camry"</span>, <span class="num">2023</span>)
+<span class="fn">print</span>(my_car.brand)    <span class="cm"># → Toyota</span>
+<span class="fn">print</span>(Car.wheels)      <span class="cm"># → 4</span></div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Класс <code>Car</code> с атрибутами: марка, модель, год, пробег. Создай 3 разных объекта и выведи информацию о каждом.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 16 -->
+    <div class="day-card" id="d16">
+      <div class="day-head" onclick="toggleCard('d16')">
+        <div class="day-num">16</div>
+        <div class="day-title">Метод __init__ и self</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d16')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p><code>__init__</code> — конструктор, вызывается автоматически при создании объекта. <code>self</code> — ссылка на сам объект, первый параметр любого метода. Валидация данных в конструкторе.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">class</span> <span class="fn">Student</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, name: str, grades: list):
+        <span class="kw">if not</span> name:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="str">"Имя не может быть пустым"</span>)
+        self.name = name
+        self.grades = grades
+        self.is_active = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">average</span>(self):
+        <span class="kw">if not</span> self.grades:
+            <span class="kw">return</span> <span class="num">0</span>
+        <span class="kw">return</span> <span class="fn">round</span>(<span class="fn">sum</span>(self.grades) / <span class="fn">len</span>(self.grades), <span class="num">2</span>)
+
+s = <span class="fn">Student</span>(<span class="str">"Алишер"</span>, [<span class="num">85</span>, <span class="num">92</span>, <span class="num">78</span>, <span class="num">95</span>])
+<span class="fn">print</span>(<span class="str">f"Средний балл: {s.average()}"</span>)   <span class="cm"># → 87.5</span></div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Класс <code>Student</code>: имя, список оценок. Методы: <code>average()</code>, <code>highest()</code>, <code>passed()</code> — вернуть True если средний балл выше 60.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 17 -->
+    <div class="day-card" id="d17">
+      <div class="day-head" onclick="toggleCard('d17')">
+        <div class="day-num">17</div>
+        <div class="day-title">Методы экземпляра</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d17')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Методы — функции внутри класса, они работают с данными объекта. Метод всегда принимает <code>self</code> первым. Могут вызывать другие методы через <code>self.method()</code>.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">class</span> <span class="fn">BankAccount</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, owner):
+        self.owner = owner
+        self.balance = <span class="num">0</span>
+        self.history = []
+
+    <span class="kw">def</span> <span class="fn">deposit</span>(self, amount):
+        self.balance += amount
+        self.history.append(<span class="str">f"+{amount}"</span>)
+
+    <span class="kw">def</span> <span class="fn">withdraw</span>(self, amount):
+        <span class="kw">if</span> self._has_funds(amount):  <span class="cm"># вызов другого метода</span>
+            self.balance -= amount
+            self.history.append(<span class="str">f"-{amount}"</span>)
+
+    <span class="kw">def</span> <span class="fn">_has_funds</span>(self, amount):  <span class="cm"># _ = внутренний метод</span>
+        <span class="kw">return</span> self.balance >= amount</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Расширь <code>BankAccount</code>: добавь метод <code>statement()</code> — выводит историю всех операций, метод <code>transfer(other, amount)</code> — перевод между счетами.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 18 -->
+    <div class="day-card" id="d18">
+      <div class="day-head" onclick="toggleCard('d18')">
+        <div class="day-num">18</div>
+        <div class="day-title">Наследование (Inheritance)</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d18')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Дочерний класс наследует все атрибуты и методы родителя. <code>super()</code> вызывает родительский метод. Можно переопределять методы (override).</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">class</span> <span class="fn">User</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, username, email):
+        self.username = username
+        self.email = email
+        self.is_active = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">login</span>(self):
+        <span class="fn">print</span>(<span class="str">f"✅ {self.username} вошёл"</span>)
+
+<span class="kw">class</span> <span class="fn">Admin</span>(<span class="fn">User</span>):  <span class="cm"># Admin наследует User</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, username, email, level):
+        <span class="fn">super</span>().__init__(username, email)  <span class="cm"># вызов родителя</span>
+        self.level = level
+
+    <span class="kw">def</span> <span class="fn">delete_user</span>(self, user):
+        <span class="fn">print</span>(<span class="str">f"🗑 {self.username} удалил {user.username}"</span>)</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Иерархия: <code>User → Admin → SuperAdmin</code>. Каждый уровень добавляет новые методы и атрибуты. SuperAdmin может менять уровень Admin.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 19 -->
+    <div class="day-card" id="d19">
+      <div class="day-head" onclick="toggleCard('d19')">
+        <div class="day-num">19</div>
+        <div class="day-title">Инкапсуляция — скрытие данных</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d19')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Приватные атрибуты <code>__attr</code> нельзя изменить снаружи напрямую. Доступ только через методы (геттеры и сеттеры). Это фундамент безопасности данных.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">class</span> <span class="fn">SecureAccount</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, owner, password):
+        self.owner = owner
+        self.__balance = <span class="num">0</span>          <span class="cm"># приватный!</span>
+        self.__password = password   <span class="cm"># приватный!</span>
+
+    <span class="kw">def</span> <span class="fn">get_balance</span>(self, password):
+        <span class="kw">if</span> password == self.__password:
+            <span class="kw">return</span> self.__balance
+        <span class="kw">return</span> <span class="str">"❌ Неверный пароль"</span>
+
+<span class="cm"># Попытка взломать снаружи:</span>
+acc = <span class="fn">SecureAccount</span>(<span class="str">"Алишер"</span>, <span class="str">"qwerty"</span>)
+<span class="cm"># acc.__balance = 99999  → AttributeError!</span></div>
+        </div>
+        <div class="tip"><div class="tip-label">🔒 Связь с безопасностью</div><p>Инкапсуляция — это не только красивый код. В реальных системах так защищают пароли, ключи шифрования и финансовые данные от случайного изменения.</p></div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Класс <code>BankAccount</code> с приватным балансом и паролем. Все операции с балансом — только через методы с проверкой пароля.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 20 -->
+    <div class="day-card" id="d20">
+      <div class="day-head" onclick="toggleCard('d20')">
+        <div class="day-num">20</div>
+        <div class="day-title">Магические методы __str__, __repr__</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d20')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>«Дандер» методы (double underscore) — специальные методы Python. <code>__str__</code> — для вывода пользователю. <code>__repr__</code> — для разработчика. <code>__len__</code>, <code>__eq__</code> и другие.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">class</span> <span class="fn">User</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, name, role):
+        self.name = name
+        self.role = role
+
+    <span class="kw">def</span> <span class="fn">__str__</span>(self):
+        <span class="cm"># Вызывается при print(user)</span>
+        <span class="kw">return</span> <span class="str">f"👤 {self.name} [{self.role}]"</span>
+
+    <span class="kw">def</span> <span class="fn">__repr__</span>(self):
+        <span class="cm"># Вызывается в отладке</span>
+        <span class="kw">return</span> <span class="str">f"User(name={self.name!r}, role={self.role!r})"</span>
+
+    <span class="kw">def</span> <span class="fn">__eq__</span>(self, other):
+        <span class="kw">return</span> self.name == other.name
+
+u = <span class="fn">User</span>(<span class="str">"Алишер"</span>, <span class="str">"admin"</span>)
+<span class="fn">print</span>(u)  <span class="cm"># → 👤 Алишер [admin]</span></div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Добавь <code>__str__</code> и <code>__repr__</code> ко всем классам недели 3. Добавь <code>__eq__</code> для сравнения пользователей по имени.</p></div>
+      </div>
+    </div>
+
+    <!-- MINI PROJECT W3 -->
+    <div class="mini-project">
+      <div class="mp-label">🏆 Мини-проект · День 21</div>
+      <h3>Система регистрации и входа</h3>
+      <p>Применяем всё ООП недели 3 в одной связной системе.</p>
+      <ul class="checklist">
+        <li>Класс <code>User</code>: username, email, приватный хешированный пароль</li>
+        <li>Класс <code>Database</code>: хранит список пользователей, методы register() и login()</li>
+        <li>Регистрация: проверка уникальности username, минимальная длина пароля</li>
+        <li>Вход: проверка username + пароля, счётчик неудачных попыток</li>
+        <li>Бонус: блокировка аккаунта после 3 неудачных попыток</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ WEEK 4 ═══════════════════ -->
+  <div id="week4" class="week-section w4">
+    <div class="week-header">
+      <div class="week-icon">🌐</div>
+      <div class="week-meta">
+        <h2>Неделя 4 — Сеть, API и безопасность</h2>
+        <p>Дни 22–30 · Backend и Security специфика · Финал: Монитор ресурсов</p>
+      </div>
+    </div>
+
+    <!-- DAY 22 -->
+    <div class="day-card" id="d22">
+      <div class="day-head" onclick="toggleCard('d22')">
+        <div class="day-num">22</div>
+        <div class="day-title">Стандартная библиотека Python</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d22')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Python поставляется с огромной библиотекой модулей. Не нужно устанавливать — просто <code>import</code>. Самые полезные: <code>os</code>, <code>sys</code>, <code>datetime</code>, <code>pathlib</code>, <code>json</code>.</p></div>
+        <div class="pills"><span class="pill">os</span><span class="pill">sys</span><span class="pill">datetime</span><span class="pill">pathlib</span><span class="pill">json</span><span class="pill">random</span></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">import</span> os
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="cm"># Список файлов в папке с размерами</span>
+folder = Path(<span class="str">"."</span>)  <span class="cm"># текущая папка</span>
+<span class="kw">for</span> file <span class="kw">in</span> folder.iterdir():
+    <span class="kw">if</span> file.is_file():
+        size = file.stat().st_size
+        modified = datetime.fromtimestamp(file.stat().st_mtime)
+        <span class="fn">print</span>(<span class="str">f"{file.name:30} {size:>8} байт  {modified:%Y-%m-%d}"</span>)</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Скрипт аудита: выводит все файлы в папке с размером, датой изменения. Находит файлы, не менявшиеся более 30 дней.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 23 -->
+    <div class="day-card" id="d23">
+      <div class="day-head" onclick="toggleCard('d23')">
+        <div class="day-num">23</div>
+        <div class="day-title">pip и виртуальные окружения</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d23')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Виртуальное окружение изолирует зависимости проекта. Каждый проект имеет свои версии библиотек. <code>requirements.txt</code> — список зависимостей.</p></div>
+        <div class="section-row"><label>Команды в терминале</label>
+          <div class="code-block"><span class="cm"># 1. Создать виртуальное окружение</span>
+python -m venv venv
+
+<span class="cm"># 2. Активировать</span>
+<span class="cm"># Windows:</span>
+venv\Scripts\activate
+<span class="cm"># Mac/Linux:</span>
+source venv/bin/activate
+
+<span class="cm"># 3. Установить библиотеку</span>
+pip install requests
+
+<span class="cm"># 4. Сохранить зависимости</span>
+pip freeze > requirements.txt
+
+<span class="cm"># 5. Восстановить зависимости (на другом ПК)</span>
+pip install -r requirements.txt</div>
+        </div>
+        <div class="tip"><div class="tip-label">✅ Хорошая практика</div><p>Каждый новый проект — новое виртуальное окружение. Это стандарт в индустрии. <code>.gitignore</code> должен содержать папку <code>venv/</code>.</p></div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Создай venv, установи <code>requests</code> и <code>colorama</code>. Напиши скрипт, использующий colorama для вывода цветного текста в терминале.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 24 -->
+    <div class="day-card" id="d24">
+      <div class="day-head" onclick="toggleCard('d24')">
+        <div class="day-num">24</div>
+        <div class="day-title">HTTP-запросы GET — библиотека requests</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d24')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>HTTP — протокол общения с серверами. <code>GET</code> — запрос данных. Библиотека <code>requests</code> делает это в одну строку. Ответ содержит статус-код и тело (часто JSON).</p></div>
+        <div class="section-row"><label>Статус-коды</label>
+          <div class="code-block"><span class="cm"># 200 — OK, 201 — Created, 400 — Bad Request
+# 401 — Unauthorized, 403 — Forbidden
+# 404 — Not Found, 500 — Server Error</span></div>
+        </div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">import</span> requests
+
+<span class="cm"># GET-запрос к бесплатному API</span>
+url = <span class="str">"https://api.exchangerate-api.com/v4/latest/USD"</span>
+response = requests.get(url, timeout=<span class="num">5</span>)
+
+<span class="kw">if</span> response.status_code == <span class="num">200</span>:
+    data = response.json()  <span class="cm"># JSON → dict автоматически</span>
+    kzt = data[<span class="str">"rates"</span>][<span class="str">"KZT"</span>]
+    eur = data[<span class="str">"rates"</span>][<span class="str">"EUR"</span>]
+    <span class="fn">print</span>(<span class="str">f"1 USD = {kzt} тенге"</span>)
+    <span class="fn">print</span>(<span class="str">f"1 USD = {eur} евро"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">f"Ошибка: {response.status_code}"</span>)</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Скрипт погоды: запроси данные из <a href="https://wttr.in" target="_blank" style="color:var(--blue)">wttr.in/Almaty?format=j1</a> и выведи температуру и описание погоды в Алматы.</p></div>
+        <div class="links">
+          <a class="lnk" href="https://requests.readthedocs.io" target="_blank">📖 Документация requests</a>
+          <a class="lnk" href="https://jsonplaceholder.typicode.com" target="_blank">🧪 Test API</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 25 -->
+    <div class="day-card" id="d25">
+      <div class="day-head" onclick="toggleCard('d25')">
+        <div class="day-num">25</div>
+        <div class="day-title">Обработка JSON-ответов</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d25')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Работа с вложенными JSON. Headers запроса. Параметры URL. Обработка ошибок сети через <code>try/except</code>. Таймаут.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">get_crypto_price</span>(coin: str) -> <span class="fn">dict</span>:
+    url = <span class="str">f"https://api.coingecko.com/api/v3/simple/price"</span>
+    params = {<span class="str">"ids"</span>: coin, <span class="str">"vs_currencies"</span>: <span class="str">"usd,kzt"</span>}
+    <span class="kw">try</span>:
+        r = requests.get(url, params=params, timeout=<span class="num">10</span>)
+        r.raise_for_status()  <span class="cm"># исключение если 4xx/5xx</span>
+        data = r.json()
+        <span class="kw">return</span> data.get(coin, {})
+    <span class="kw">except</span> requests.exceptions.Timeout:
+        <span class="kw">return</span> {<span class="str">"error"</span>: <span class="str">"Таймаут"</span>}
+    <span class="kw">except</span> requests.exceptions.ConnectionError:
+        <span class="kw">return</span> {<span class="str">"error"</span>: <span class="str">"Нет соединения"</span>}</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Программа: пользователь вводит название крипты (bitcoin, ethereum), скрипт получает цену в USD и выводит с красивым форматированием.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 26 -->
+    <div class="day-card" id="d26">
+      <div class="day-head" onclick="toggleCard('d26')">
+        <div class="day-num">26</div>
+        <div class="day-title">HTTP POST — отправка данных</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d26')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>POST — отправка данных на сервер. Используется для регистрации, логина, создания записей. Данные передаются в теле запроса как JSON или форма.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">import</span> requests
+
+<span class="cm"># Тестовый API — jsonplaceholder.typicode.com</span>
+url = <span class="str">"https://jsonplaceholder.typicode.com/posts"</span>
+post_data = {
+    <span class="str">"title"</span>: <span class="str">"Мой первый POST"</span>,
+    <span class="str">"body"</span>: <span class="str">"Тело сообщения"</span>,
+    <span class="str">"userId"</span>: <span class="num">1</span>
+}
+
+response = requests.post(url, json=post_data)
+<span class="fn">print</span>(<span class="str">f"Статус: {response.status_code}"</span>)  <span class="cm"># → 201</span>
+created = response.json()
+<span class="fn">print</span>(<span class="str">f"ID новой записи: {created['id']}"</span>)</div>
+        </div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Напиши функции для всех CRUD операций: GET (список), GET (один), POST (создать), PUT (обновить), DELETE. Тестируй на jsonplaceholder.typicode.com.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 27 -->
+    <div class="day-card" id="d27">
+      <div class="day-head" onclick="toggleCard('d27')">
+        <div class="day-num">27</div>
+        <div class="day-title">Хеширование паролей — hashlib</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d27')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Хеш — одностороннее преобразование. Нельзя восстановить исходные данные из хеша. <code>SHA-256</code> — стандарт. «Соль» (salt) — случайные данные для защиты от радужных таблиц.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">import</span> hashlib
+<span class="kw">import</span> os
+
+<span class="kw">def</span> <span class="fn">hash_password</span>(password: str) -> str:
+    <span class="cm"># Соль — случайные байты, делает хеш уникальным</span>
+    salt = os.urandom(<span class="num">32</span>)
+    key = hashlib.pbkdf2_hmac(
+        <span class="str">"sha256"</span>, password.encode(), salt, <span class="num">100000</span>
+    )
+    <span class="kw">return</span> salt.hex() + key.hex()
+
+<span class="kw">def</span> <span class="fn">check_password</span>(password: str, stored: str) -> <span class="fn">bool</span>:
+    salt = bytes.fromhex(stored[:<span class="num">64</span>])
+    stored_key = stored[<span class="num">64</span>:]
+    key = hashlib.pbkdf2_hmac(<span class="str">"sha256"</span>, password.encode(), salt, <span class="num">100000</span>)
+    <span class="kw">return</span> key.hex() == stored_key</div>
+        </div>
+        <div class="tip"><div class="tip-label">🔒 ВАЖНО</div><p>В реальных проектах используй библиотеку <code>bcrypt</code> или <code>passlib</code> — они специально спроектированы для паролей и умеют регулировать сложность хеширования.</p></div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Система паролей: регистрация (хешировать и сохранить), вход (проверить хеш). Сохрани пользователей в JSON файл.</p></div>
+      </div>
+    </div>
+
+    <!-- DAY 28 -->
+    <div class="day-card" id="d28">
+      <div class="day-head" onclick="toggleCard('d28')">
+        <div class="day-num">28</div>
+        <div class="day-title">Регулярные выражения — re</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d28')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Regex — язык поиска по шаблону в тексте. <code>re.findall()</code> — найти все совпадения. <code>re.match()</code> — проверить начало. <code>re.sub()</code> — заменить.</p></div>
+        <div class="pills"><span class="pill">\d</span><span class="pill">\w</span><span class="pill">\s</span><span class="pill">.</span><span class="pill">*</span><span class="pill">+</span><span class="pill">?</span><span class="pill">[]</span><span class="pill">^</span><span class="pill">$</span></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">import</span> re
+
+log_text = <span class="str">"""
+2024-01-15 ERROR user@company.com login failed from 192.168.1.1
+2024-01-15 INFO admin@corp.kz logged in from 10.0.0.5
+"""</span>
+
+<span class="cm"># Найти все email-адреса</span>
+emails = re.findall(<span class="str">r'[\w.-]+@[\w.-]+\.\w+'</span>, log_text)
+
+<span class="cm"># Найти все IP-адреса</span>
+ips = re.findall(<span class="str">r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'</span>, log_text)
+
+<span class="cm"># Проверить валидность email</span>
+<span class="kw">def</span> <span class="fn">is_valid_email</span>(email):
+    pattern = <span class="str">r'^[\w.-]+@[\w.-]+\.[a-z]{2,}$'</span>
+    <span class="kw">return</span> <span class="fn">bool</span>(re.match(pattern, email, re.IGNORECASE))</div>
+        </div>
+        <div class="tip"><div class="tip-label">🔒 Связь с ИБ</div><p>Regex — основной инструмент для анализа логов, поиска подозрительных паттернов, валидации входных данных (защита от инъекций).</p></div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Лог-анализатор: читает лог-файл, извлекает все emails, IP-адреса, временны́е метки. Выводит статистику: сколько уникальных IP, какие часто встречаются.</p></div>
+        <div class="links">
+          <a class="lnk" href="https://regex101.com" target="_blank">🧪 Тестировать regex</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 29 -->
+    <div class="day-card" id="d29">
+      <div class="day-head" onclick="toggleCard('d29')">
+        <div class="day-num">29</div>
+        <div class="day-title">Многопоточность — threading</div>
+        <div class="day-check" onclick="event.stopPropagation();markDone('d29')">✓</div>
+        <div class="day-arrow">▶</div>
+      </div>
+      <div class="day-body">
+        <div class="section-row"><label>Что изучить</label><p>Поток — параллельная задача внутри программы. Полезно для сетевых операций, I/O задач. <code>ThreadPoolExecutor</code> — удобный способ создать пул потоков.</p></div>
+        <div class="section-row"><label>Пример</label>
+          <div class="code-block"><span class="kw">import</span> socket
+<span class="kw">from</span> concurrent.futures <span class="kw">import</span> ThreadPoolExecutor
+
+<span class="kw">def</span> <span class="fn">scan_port</span>(host, port):
+    <span class="kw">try</span>:
+        sock = socket.socket()
+        sock.settimeout(<span class="num">0.5</span>)
+        result = sock.connect_ex((host, port))
+        sock.close()
+        <span class="kw">if</span> result == <span class="num">0</span>:
+            <span class="fn">print</span>(<span class="str">f"✅ Порт {port} открыт"</span>)
+    <span class="kw">except</span>:
+        <span class="kw">pass</span>
+
+host = <span class="str">"127.0.0.1"</span>
+ports = <span class="fn">range</span>(<span class="num">1</span>, <span class="num">1025</span>)
+
+<span class="cm"># Сканируем 100 портов одновременно</span>
+<span class="kw">with</span> ThreadPoolExecutor(max_workers=<span class="num">100</span>) <span class="kw">as</span> pool:
+    pool.map(<span class="kw">lambda</span> p: <span class="fn">scan_port</span>(host, p), ports)</div>
+        </div>
+        <div class="tip"><div class="tip-label">⚠ Правило</div><p>Сканируй порты только на своих системах или с явного разрешения. Сканирование чужих серверов без разрешения — это незаконно.</p></div>
+        <div class="task-box"><div class="task-label">Задача дня</div><p>Портсканер: сканирует 127.0.0.1, порты 1-1024, в 100 потоков. Выводит открытые порты и определяет стандартные сервисы (80=HTTP, 443=HTTPS, 22=SSH и т.д.).</p></div>
+      </div>
+    </div>
+
+    <!-- FINAL PROJECT W4 -->
+    <div class="mini-project">
+      <div class="mp-label">🎓 Финальный проект · День 30</div>
+      <h3>Монитор доступности сайтов</h3>
+      <p>Это настоящий инструмент — такие используются в DevOps и Security для мониторинга инфраструктуры.</p>
+      <ul class="checklist">
+        <li>Читает список URL из файла <code>urls.txt</code> (по одному на строку)</li>
+        <li>Параллельно проверяет каждый сайт через <code>requests</code> + <code>threading</code></li>
+        <li>Если статус не 200 — пишет в <code>security_log.txt</code> с временем и ошибкой</li>
+        <li>Запускается в бесконечном цикле, проверяя каждые 60 секунд</li>
+        <li>Бонус: уведомление в Telegram через Bot API при падении сайта</li>
+        <li>Бонус 2: замеряет время ответа, предупреждает если более 2 секунд</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer container">
+  <p>Python 30 Days · Backend & Cybersecurity · <span>2024</span></p>
+  <p style="margin-top:6px">Прогресс сохраняется в браузере автоматически</p>
+</div>
+
+<script>
+const DONE_KEY = 'py30_done';
+let done = JSON.parse(localStorage.getItem(DONE_KEY) || '[]');
+
+function saveState() {
+  localStorage.setItem(DONE_KEY, JSON.stringify(done));
+}
+
+function updateProgress() {
+  const total = 30;
+  const count = done.length;
+  const pct = Math.round(count / total * 100);
+  document.getElementById('bar').style.width = pct + '%';
+  document.getElementById('prog-val').textContent = pct + '%';
+  document.getElementById('done-count').textContent = count;
+}
+
+function markDone(id) {
+  const card = document.getElementById(id);
+  if (done.includes(id)) {
+    done = done.filter(d => d !== id);
+    card.classList.remove('done');
+  } else {
+    done.push(id);
+    card.classList.add('done');
+  }
+  saveState();
+  updateProgress();
+}
+
+function toggleCard(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+
+function showWeek(n) {
+  document.querySelectorAll('.week-section').forEach(s => s.classList.remove('show'));
+  document.getElementById('week' + n).classList.add('show');
+  document.querySelectorAll('.wnav').forEach((btn, i) => {
+    btn.className = 'wnav';
+    if (i + 1 === n) btn.classList.add('active-w' + n);
+  });
+}
+
+// Restore done state
+done.forEach(id => {
+  const card = document.getElementById(id);
+  if (card) card.classList.add('done');
+});
+
+updateProgress();
+</script>
+</body>
+</html>
